@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Canvas漂浮动画</title>
+	<style>
+	* {
+		margin: 0;
+		/* padding: 0; */
+	}
+
+	#bubble {
+		display: block;
+      /* width: 100%;
+      height: 100%; */
+    }
+  </style>
+</head>
+
+<body>
+	<canvas id="bubble"></canvas>
+
+	<script>
+    /*
+                                          程序逻辑:
+                                              1.让canvas的大小和浏览器宽高一致
+                                                1.1.获取canvas 获取浏览器宽高
+                                                1.2.设置canvas
+                                                1.3.当浏览器窗口变化时,重置canvas的大小
+                                              2.绘制图形
+                                              3.如何实现动画
+                                              4. 生成666个小泡泡
+                                              */
+    //1.
+    var cas = document.getElementById('bubble');
+    var w = window.innerWidth;
+    var h = window.innerHeight;
+    cas.width = w;
+    cas.height = h;
+    window.onresize = function () {
+    	w = window.innerWidth;
+    	h = window.innerHeight;
+    	cas.width = w;
+    	cas.height = h;
+    }
+    //2.用canvas绘制一个图形
+    var casCon = cas.getContext("2d"); //获取画布宣纸
+
+    var y = 100;
+
+    //3.动画
+    // setInterval(function () {
+    //   casCon.clearRect(0, 0, w, h); //清除画布
+    //   casCon.beginPath(); //提笔重新绘制
+    //   casCon.fillStyle = "red"; // 拿起画笔,蘸上红色的颜料
+    //   casCon.arc(233, y++, 100, 0, Math.PI * 2); //圆心位置x,y,半径r,起始弧度,结束弧度
+    //   casCon.fill(); //画一个图形
+    // }, 1000 / 60)
+
+    //4.随机小泡泡
+    function Bubble() {}
+
+    function random(min, max) { //返回一个 [min,max)的数
+    	return Math.random() * (max - min) + min;
+    }
+
+    var colorArr = ["E08031", "#199475", "#99CC99", "#009966", "#0099CC"];
+    Bubble.prototype = {
+    	init: function () {
+        this.x = random(0, w); //随机位置0-w
+        this.y = random(0, h); //随机位置0-h
+        this.r = random(1, 3); //随机半斤1-3
+        this.color = colorArr[Math.floor(random(0, 5))]; //随机颜色
+        this.xr = random(-1, 1); //x轴方向每一帧移动的距离
+        this.yr = random(-1, 1);
+        //鼠标位置半径50内小泡泡变大
+        this.d = 50; 
+        this.vr = 1;
+      },
+      draw() {
+        casCon.beginPath(); //提笔重新绘制
+        casCon.fillStyle = this.color; // 拿起画笔,蘸上随机颜色的颜料
+        casCon.arc(this.x, this.y, this.r, 0, Math.PI * 2); //圆心位置x,y,半径r,起始弧度,结束弧度
+        casCon.fill(); //画一个图形
+      },
+      // 移动
+      move() {
+      	this.x += this.xr;
+      	this.y += this.yr;
+        // 画布x轴左右碰撞
+        if(this.x - this.r < 0 || this.x + this.r > w){
+        	this.xr = -this.xr;
+        }
+        if(this.y - this.r < 0 || this.y + this.r > h){
+        	this.yr = -this.yr;
+        }
+        //2D碰撞检测
+        if(Math.sqrt(Math.pow(pX - this.x, 2) + Math.pow(pY - this.y, 2)) < this.d){
+        	this.r += this.vr;
+        }else if(this.r > 4 && Math.sqrt(Math.pow(pX - this.x, 2) + Math.pow(pY - this.y, 2)) > this.d){
+        	this.r -= this.vr;
+        }
+        //移动完重新绘制
+        this.draw();
+      }
+    }
+
+    var bubbleArr = []; //存放小泡泡
+    // 生成小泡泡
+    function create() {
+    	var bubble = new Bubble();
+    	bubble.init();
+    	bubble.draw();
+    	bubbleArr.push(bubble);
+    }
+    // 666个小泡泡走起
+    for (let i = 0; i < 666; i++) {
+    	create();
+    }
+
+    setInterval(function () {
+    	casCon.clearRect(0,0,w,h);
+      for (var item of bubbleArr) { //ES6遍历语法
+      	item.move();
+      }
+    }, 1000 / 60)
+
+    // 获取鼠标位置
+
+    var pY,pX;//鼠标当前位置
+    cas.onmousemove = function (e) {
+    	e= e || window.event;
+    	pX = e.clientX;
+    	pY = e.clientY; 
+    }
+
+
+
+
+  </script>
+</body>
+
+</html>
